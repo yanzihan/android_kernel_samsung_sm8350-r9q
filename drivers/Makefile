@@ -192,10 +192,6 @@ obj-$(CONFIG_COUNTER)		+= counter/
 obj-$(CONFIG_SENSORS_SSC)	+= sensors/
 obj-$(CONFIG_ADSP_FACTORY)      += adsp_factory/
 
-obj-$(CONFIG_FASTUH) += fastuh/
-
-obj-y				+= knox/
-
 # SPU signature verify
 obj-$(CONFIG_SPU_VERIFY) += spu_verify/
 obj-y += regulator/pmic_class/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT

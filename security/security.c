@@ -647,17 +647,10 @@ static void __init lsm_early_task(struct task_struct *task)
  *	This is a hook that returns a value.
  */
 
-/*
- * security_integrity_current() is added,
- * which has a dependency of CONFIG_FASTUH_KDP.
- * security_integrity_current is added to check integrity of credential context.
- * if CONFIG_FASTUH_KDP is disabled, it will always return 0.
- */
 #define call_void_hook(FUNC, ...)				\
 	do {							\
 		struct security_hook_list *P;			\
 								\
-		if(security_integrity_current()) break;		\
 		hlist_for_each_entry(P, &security_hook_heads.FUNC, list) \
 			P->hook.FUNC(__VA_ARGS__);		\
 	} while (0)
@@ -667,9 +660,6 @@ static void __init lsm_early_task(struct task_struct *task)
 	do {							\
 		struct security_hook_list *P;			\
 								\
-		RC = security_integrity_current();		\
-		if (RC != 0)					\
-			break;					\
 		hlist_for_each_entry(P, &security_hook_heads.FUNC, list) { \
 			RC = P->hook.FUNC(__VA_ARGS__);		\
 			if (RC != 0)				\
@@ -1605,17 +1595,8 @@ void security_cred_free(struct cred *cred)
 
 	call_void_hook(cred_free, cred);
 
-#ifdef CONFIG_FASTUH_KDP
-	if (is_kdp_protect_addr((unsigned long)cred)) {
-		kdp_free_security((unsigned long)cred->security);
-		fastuh_call(FASTUH_APP_KDP, SELINUX_CRED_FREE, (u64) &cred->security, 0, 0, 0);
-	} else {
-#endif
 	kfree(cred->security);
 	cred->security = NULL;
-#ifdef CONFIG_FASTUH_KDP
-	}
-#endif
 }
 
 int security_prepare_creds(struct cred *new, const struct cred *old, gfp_t gfp)

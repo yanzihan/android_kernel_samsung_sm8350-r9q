@@ -234,8 +234,6 @@ source "drivers/samsung/Kconfig"
 
 source "drivers/sensors/Kconfig"
 
-source "drivers/knox/Kconfig"
-
 source "drivers/adsp_factory/Kconfig"
 
 source "drivers/spu_verify/Kconfig"
