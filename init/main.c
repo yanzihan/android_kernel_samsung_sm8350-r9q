@@ -114,11 +114,6 @@ extern int test_executor_init(void);
 #include <linux/sec_debug.h>
 #include <linux/sec_bootstat.h>
 
-#ifdef CONFIG_SECURITY_DEFEX
-#include <linux/defex.h>
-void __init __weak defex_load_rules(void) { }
-#endif
-
 static int kernel_init(void *);
 
 extern void init_IRQ(void);
