@@ -1222,8 +1222,8 @@ static int send_signal(int sig, struct kernel_siginfo *info, struct task_struct 
 		if ((current->pid != 1) && ((sig == SIGKILL && !strncmp("main", t->group_leader->comm, 4))
 				|| ((sig == SIGKILL || sig == SIGSEGV)
 					&& !strncmp("system_server", t->group_leader->comm, 13)))) {
-			pr_info("Send signal %d from %s(%d) to %s(%d) : %d\n",
-						sig, current->comm, current->pid, t->comm, t->pid, info->si_code);
+//			pr_info("Send signal %d from %s(%d) to %s(%d) : %d\n",
+//						sig, current->comm, current->pid, t->comm, t->pid, info->si_code);
 		}
 	}
 	/* SystemF/W]*/
