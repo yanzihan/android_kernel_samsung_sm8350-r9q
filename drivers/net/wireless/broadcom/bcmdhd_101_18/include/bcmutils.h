@@ -656,7 +656,7 @@ uint16 bcmhex2bin(const uint8* hex, uint hex_len, uint8 *buf, uint buf_len);
 	/* use 0x10 offset to avoid undefined behavior error due to NULL access */
 	#define OFFSETOF(type, member)	(((uint)(uintptr)&((type *)0x10)->member) - 0x10)
 #else
-	#define	OFFSETOF(type, member)	((uint)(uintptr)&((type *)0)->member)
+	#define OFFSETOF(type, member)  __builtin_offsetof(type, member)
 #endif /* BCMFUZZ */
 #endif /* GCC 4.8 or newer */
 #endif /* OFFSETOF */
