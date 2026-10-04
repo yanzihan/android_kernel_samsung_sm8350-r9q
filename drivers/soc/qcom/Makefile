@@ -128,8 +128,3 @@ obj-$(CONFIG_QCOM_CX_IPEAK) += cx_ipeak.o
 obj-$(CONFIG_GNSS_SIRF)		+= gnsssirf/
 obj-$(CONFIG_MSM_SEB) += slate_events_bridge.o
 obj-$(CONFIG_MSM_SEB_RPMSG) += slate_events_bridge_rpmsg.o
-ifeq ($(CONFIG_HDM),y)
-# Support Knox HDM feature
-  ccflags-y += -DHDM_SUPPORT
-endif
-
