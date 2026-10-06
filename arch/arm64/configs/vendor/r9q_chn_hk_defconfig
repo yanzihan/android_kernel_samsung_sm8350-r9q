@@ -7496,3 +7496,6 @@ CONFIG_DISPLAY_SAMSUNG=y
 # CONFIG_PARTIAL_UPDATE is not set
 # CONFIG_CABC_FUNCTION is not set
 # CONFIG_SUPPORT_POC_FLASH is not set
+
+# KernelSU (official v0.9.5, kprobes)
+CONFIG_KSU=y
