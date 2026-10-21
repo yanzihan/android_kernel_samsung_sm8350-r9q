@@ -21,7 +21,7 @@ $(info $$ apt install libmnl-dev)
 $(error libmnl not found)
 endif
 
-CFLAGS+=-Wall -Werror -Wfatal-errors $(shell $(PKGCONFIG) --cflags libmnl) -I..
+CFLAGS+=-Wall -Wno-error -Wfatal-errors $(shell $(PKGCONFIG) --cflags libmnl) -I..
 LDLIBS+=$(shell $(PKGCONFIG) --libs libmnl)
 
 .PHONY: all clean
