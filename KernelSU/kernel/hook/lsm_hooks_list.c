@@ -36,6 +36,13 @@ static __nocfi void ksu_bprm_committing_creds(struct linux_binprm *bprm)
 #ifdef CONFIG_KSU_FEATURE_SULOG
 	ksu_sulog_emit_bprm((const char *)bprm->filename);
 #endif
+	// Exec-time fd hand-off for manager children (ksud): O_CLOEXEC fds are
+	// already closed here and a fresh non-CLOEXEC fd survives into the new
+	// program, so ksud can reach the driver without the reboot() magic
+	// (which Samsung app seccomp blocks).
+	if (is_manager())
+		ksu_install_fd();
+
 	bprm_committing_creds_fn(bprm); // NOTE: void LSM hook
 }
 
@@ -258,6 +265,7 @@ do {												\
 	void *hook_head = (void *)&security_hook_heads.hook_name;				\
 	uintptr_t *old_ptr = (uintptr_t *)&hook_name##_fn;					\
 	int ret = ksu_hack_lsm_slot(hook_head, old_ptr, (uintptr_t)(hook_fn), #hook_name);	\
+	ksu_dbg_log("lsm %s ret=%d old=%px\n", #hook_name, ret, (void *)*old_ptr);								\
 	if (ret == 2)										\
 		ksu_bruteforce_lsm_slot(old_ptr, (uintptr_t)(hook_fn), #hook_name);		\
 } while (0)
@@ -316,6 +324,9 @@ static __init void ksu_lsm_hook_init(void)
 	LSM_HACK_INIT(bprm_committing_creds, ksu_bprm_committing_creds);
 #endif
 
+	// Rules are applied by a dedicated polling kthread instead (selinux/rules.c):
+	// doing it from this hook runs stop_machine() inside init's read path and
+	// deadlocks on this kernel.
 #if !defined(CONFIG_KSU_TAMPER_SYSCALL_TABLE) && !defined(CONFIG_KSU_HACK_ARM64_BRANCH_LINK)
 	LSM_HACK_INIT(file_permission, ksu_file_permission);
 	kthread_run(ksu_restore_file_permission, NULL, "kthread");
