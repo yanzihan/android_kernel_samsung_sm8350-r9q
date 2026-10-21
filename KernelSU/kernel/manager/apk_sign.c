@@ -303,8 +303,26 @@ int get_pkg_from_apk_dir_path(char *pkg, const char *path)
 		return -1;
 
 	const char *last_hyphen = strchr(last_slash, '-');
-	if (!last_hyphen)
-		return -1;
+	if (!last_hyphen) {
+		/*
+		 * Samsung's preload installer uses
+		 * /data/app/<PreloadDir>/<package>==/base.apk, which has no
+		 * "-<suffix>" part; take the directory name and strip the
+		 * trailing '=' characters.
+		 */
+		int name_len = strlen(last_slash + 1);
+
+		while (name_len > 0 && last_slash[name_len] == '=')
+			name_len--;
+
+		if (name_len <= 0 || name_len >= KSU_MAX_PACKAGE_NAME)
+			return -1;
+
+		memcpy(pkg, last_slash + 1, name_len);
+		pkg[name_len] = '\0';
+
+		return 0;
+	}
 
 	int pkg_len = last_hyphen - last_slash - 1;
 	if (pkg_len >= KSU_MAX_PACKAGE_NAME || pkg_len <= 0)
