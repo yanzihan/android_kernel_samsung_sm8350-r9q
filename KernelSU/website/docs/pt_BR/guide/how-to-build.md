@@ -1,4 +1,9 @@
-# Como compilar o KernelSU?
+# Como compilar
+
+::: warning
+Este documento é apenas para referência de arquivo e não é mais mantido.
+Desde o KernelSU v3.0, abandonamos o suporte oficial para o modo de imagem GKI para iteração e velocidade de compilação mais rápidas. É recomendado usar `Ylarod/ddk` para compilar o LKM.
+:::
 
 Primeiro, você deve ler a documentação oficial do Android para compilação do kernel:
 
@@ -6,7 +11,7 @@ Primeiro, você deve ler a documentação oficial do Android para compilação d
 2. [Builds de versão de imagem genérica do kernel (GKI)](https://source.android.com/docs/core/architecture/kernel/gki-release-builds)
 
 ::: warning AVISO
-Esta página é para dispositivos GKI, se você usa um kernel antigo, consulte [Como integrar o KernelSU para kernels não GKI](how-to-integrate-for-non-gki).
+Esta página é para dispositivos GKI, se você usa um kernel antigo, consulte [Integração para dispositivos não-GKI](how-to-integrate-for-non-gki).
 :::
 
 ## Compilar o kernel
@@ -20,7 +25,7 @@ repo init -m manifest.xml
 repo sync
 ```
 
-O `<kernel_manifest.xml>` é um arquivo de manifesto que pode determinar uma compilação exclusivamente, você pode usar o manifesto para fazer uma compilação re-preduzível. Você deve baixar o arquivo de manifesto em [Builds de versão de imagem genérica do kernel (GKI)](https://source.android.com/docs/core/architecture/kernel/gki-release-builds).
+O arquivo `<kernel_manifest.xml>` é um manifesto que pode determinar exclusivamente uma compilação, permitindo que você a torne reprodutível. Para isso, você deve baixar o arquivo de manifesto em [Builds de versão de imagem genérica do kernel (GKI)](https://source.android.com/docs/core/architecture/kernel/gki-release-builds).
 
 ### Construir
 
@@ -40,7 +45,7 @@ A partir do Android 13, o kernel é compilado pelo `bazel`:
 tools/bazel build --config=fast //common:kernel_aarch64_dist
 ```
 
-:::info INFORMAÇÕES
+::: info INFORMAÇÕES
 Para alguns kernel do Android 14, para fazer o Wi-Fi/Bluetooth funcionar, pode ser necessário remover todas as exportações protegidas pelo GKI:
 
 ```sh
@@ -50,7 +55,7 @@ rm common/android/abi_gki_protected_exports_*
 
 ## Compilar o kernel com KernelSU
 
-Se você conseguir compilar o kernel com sucesso, adicionar suporte ao KernelSU a ele será relativamente fácil. Na raiz do diretório de origem do kernel, execute qualquer uma das opções listadas abaixo:
+Se você conseguir compilar o kernel com sucesso, adicionar suporte ao KernelSU será relativamente simples. Na raiz do diretório de origem do kernel, execute qualquer uma das opções listadas abaixo:
 
 ::: code-group
 
@@ -58,7 +63,7 @@ Se você conseguir compilar o kernel com sucesso, adicionar suporte ao KernelSU 
 curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
 ```
 
-```sh[Branch principal (dev)]
+```sh[Branch main (dev)]
 curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s main
 ```
 
@@ -68,4 +73,4 @@ curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh
 
 :::
 
-E então reconstrua o kernel e você obterá uma imagem do kernel com KernelSU!
+Então, reconstrua o kernel e você obterá uma imagem do kernel com o KernelSU!

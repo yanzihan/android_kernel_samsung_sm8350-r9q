@@ -1,10 +1,10 @@
-[English](README.md) | [Español](README_ES.md) | [简体中文](README_CN.md) | [繁體中文](README_TW.md) | [日本語](README_JP.md) | [한국어](README_KR.md) | [Polski](README_PL.md) | [Português (Brasil)](README_PT-BR.md) | **Türkçe** | [Русский](README_RU.md) | [Tiếng Việt](README_VI.md) | [Indonesia](README_ID.md) | [עברית](README_IW.md) | [हिंदी](README_IN.md)
+[English](README.md) | [Español](README_ES.md) | [简体中文](README_CN.md) | [繁體中文](README_TW.md) | [日本語](README_JP.md) | [한국어](README_KR.md) | [Polski](README_PL.md) | [Português (Brasil)](README_PT-BR.md) | **Türkçe** | [Русский](README_RU.md) | [Tiếng Việt](README_VI.md) | [Indonesia](README_ID.md) | [עברית](README_IW.md) | [हिंदी](README_IN.md) | [Italiano](README_IT.md)
 
 # KernelSU
 
 <img src="https://kernelsu.org/logo.png" style="width: 96px;" alt="logo">
 
-Android cihazlar için kernel tabanlı root çözümü.
+Android cihazlar için çekirdek tabanlı root çözümü.
 
 [![Latest release](https://img.shields.io/github/v/release/tiann/KernelSU?label=Release&logo=github)](https://github.com/tiann/KernelSU/releases/latest)
 [![Weblate](https://img.shields.io/badge/Localization-Weblate-teal?logo=weblate)](https://hosted.weblate.org/engage/kernelsu)
@@ -14,17 +14,20 @@ Android cihazlar için kernel tabanlı root çözümü.
 
 ## Özellikler
 
-1. Kernel-tabanlı `su` ve root erişimi yönetimi.
-2. [OverlayFS](https://en.wikipedia.org/wiki/OverlayFS)'ye dayalı modül sistemi.
+1. Çekirdek-tabanlı `su` ve root erişimi yönetimi.
+2. [metamodules](https://kernelsu.org/guide/metamodule.html)'ye dayalı modül sistemi: Sistemsiz modifikasyonlar için takılabilir altyapı.
 3. [Uygulama profili](https://kernelsu.org/guide/app-profile.html): Root gücünü bir kafese kapatın.
 
 ## Uyumluluk Durumu
 
-KernelSU resmi olarak Android GKI 2.0 cihazlarını (5.10+ kernelli) destekler, eski kernellerle de (4.14+) uyumludur, ancak kerneli kendinizin derlemeniz gerekir.
+KernelSU resmi olarak Android GKI 2.0 cihazlarını (5.10+ çekirdekli) destekler, eski çekirdeklerle de (4.14+) uyumludur, ancak çekirdeği kendiniz derlemeniz gerekir.
 
 Bununla birlikte; WSA, ChromeOS ve konteyner tabanlı Android'in tamamı desteklenmektedir.
 
-Şimdilik sadece `arm64-v8a` ve `x86_64` desteklenmektedir.
+Şu anda `arm64-v8a` ve `x86_64` mimarileri desteklenmektedir.
+
+> [!CAUTION]
+> Yeni çekirdek sürümleri, KernelSU'nun çökmesine ve `x86_64` üzerinde kernel panic tetiklemesine neden olabilecek uyumsuz bir değişiklik uyguladı! Daha fazla bilgi için web sitesini kontrol edin!
 
 ## Kullanım
 

@@ -45,7 +45,7 @@ w      .x         .y       -zzz           -k            -something
 
 ### 安全补丁级别 {#security-patch-level}
 
-新的 Android 设备上可能采取了防回滚机制，它不允许刷入一个安全补丁更旧的内核。比如，如果你的设备内核是 `5.10.101-android12-9-g30979850fc20`，它的安全补丁为 `2023-11`；即使你刷入与内核 KMI 一致的内核，如果安全补丁级别比 `2023-11`要老（例如`2023-06`），那么很可能会无法开机。
+新的 Android 设备上可能采取了防回滚机制，它不允许刷入一个安全补丁更旧的内核。比如，如果你的设备内核是 `5.10.101-android12-9-g30979850fc20`，它的安全补丁为 `2023-11`；即使你刷入与内核 KMI 一致的内核，如果安全补丁级别比 `2023-11` 要老（例如`2023-06`），那么很可能会无法开机。
 
 因此，在保持 KMI 一致的情况下，优先采用安全补丁级别更新的内核。
 
@@ -59,17 +59,10 @@ w      .x         .y       -zzz           -k            -something
 
 自 `0.9.0` 版本以后，在 GKI 设备中，KernelSU 支持两种运行模式：
 
-1. `GKI`：使用**通用内核镜像**（GKI）替换掉设备原有的内核。
-2. `LKM`：使用**可加载内核模块**（LKM）的方式加载到设备内核中，不会替换掉设备原有的内核。
+1. `LKM`：使用**可加载内核模块**（LKM）的方式加载到设备内核中，不会替换掉设备原有的内核。
+2. `GKI`：使用**通用内核镜像**（GKI）替换掉设备原有的内核。
 
 这两种方式适用于不同的场景，你可以根据自己的需求选择。
-
-### GKI 模式 {#gki-mode}
-
-GKI 模式会替换掉设备原有的内核，使用 KernelSU 提供的通用内核镜像。GKI 模式的优点是：
-
-1. 通用型强，适用于大多数设备；比如三星开启了 KNOX 的设备，LKM 模式无法运作。还有一些冷门的魔改设备，也只能使用 GKI 模式；
-2. 不依赖官方固件即可使用；不需要等待官方固件更新，只要 KMI 一致，就可以使用；
 
 ### LKM 模式 {#lkm-mode}
 
@@ -80,9 +73,12 @@ LKM 模式不会替换掉设备原有的内核，而是使用可加载内核模�
 3. 适用于一些特殊场景；比如使用临时 ROOT 权限也可以加载 LKM，由于不需要替换 boot 分区，因此不会触发 avb，不会使设备意外变砖；
 4. LKM 可以被临时卸载；如果你临时想取消 root，可以卸载 LKM，这个过程不需要刷写分区，甚至也不用重启设备；如果你想再次 root，只需要重启设备即可；
 
-:::tip 两种模式共存
-打开管理器后，你可以在首页看到设备当前运行的模式；注意 GKI 模式的优先级高于 LKM，如你你既使用 GKI 内核替换掉了原有的内核，又使用 LKM 的方式修补了 GKI 内核，那么 LKM 会被忽略，设备将永远以 GKI 的模式运行。
-:::
+### GKI 模式 {#gki-mode}
+
+GKI 模式会替换掉设备原有的内核，使用 KernelSU 提供的通用内核镜像。GKI 模式的优点是：
+
+1. 通用型强，适用于大多数设备；比如三星开启了 KNOX 的设备，LKM 模式无法运作。还有一些冷门的魔改设备，也只能使用 GKI 模式；
+2. 不依赖官方固件即可使用；不需要等待官方固件更新，只要 KMI 一致，就可以使用；
 
 ### 选哪个？ {#which-one}
 
@@ -107,6 +103,13 @@ LKM 模式不会替换掉设备原有的内核，而是使用可加载内核模�
 1. 选择并修补一个文件；如果你手机目前没有 root 权限，你可以选择这个选项，然后选择你的官方固件，管理器会自动修补它；你只需要刷入这个修补后的文件，即可永久获取 root 权限；
 2. 直接安装；如果你手机已经 root，你可以选择这个选项，管理器会自动获取你的设备信息，然后自动修补官方固件，然后刷入；你可以考虑使用 `fastboot boot` KernelSU 的 GKI 内核来获取临时 root 安装管理器，然后再使用这个选项；这种方式也是 KernelSU 升级最主要的方式；
 3. 安装到另一个分区；如果你的设备支持 A/B 分区，你可以选择这个选项，管理器会自动修补官方固件，然后安装到另一个分区；这种方式适用于 OTA 后的设备，你可以在 OTA 后直接安装到另一个分区，然后重启设备即可；
+
+:::tip 备份原厂 boot 镜像
+使用管理器的「直接安装」可自动备份原厂 boot （或 init_boot）镜像，以备增量 OTA 时临时还原。请注意，这种情况下只有当前分区没有被 KernelSU 修补过，才会产生备份。
+备份镜像的 SHA1 值会保存到修补的 boot 镜像中，备份的文件存储在 `/data/adb/ksu/ksu_backup_$SHA1` 。
+当使用管理器的「卸载 → 还原原厂镜像」功能时，如果当前修补的镜像记录的 SHA1 存在对应的备份文件，则会直接恢复。
+自 3.3.0 起，如果是在没有 Root 的情况下首次安装 KernelSU ，使用「选择并修补一个文件」方式修补 boot 镜像后可选择「备份为原厂镜像」，此时备份镜像会保存到管理器的内部存储中，这样刷入修补后的镜像后启动，首次打开管理器就会自动将备份移动到 `/data/adb/ksu` 。
+:::
 
 ### 使用命令行
 
@@ -163,7 +166,7 @@ GKI 的安装方法有如下几种，各自适用于不同的场景，请按需�
 
 KernelSU 为 GKI 设备提供了通用的 boot.img，您应该将 boot.img 刷写到设备的 boot 分区。
 
-您可以从 [GitHub Release](https://github.com/tiann/KernelSU/releases) 下载 boot.img, 请注意您应该使用正确版本的 boot.img。如果您不知道应该下载哪一个文件，请仔细阅读本文档中关于 [KMI](#kmi) 和 [安全补丁级别](#security-patch-level)的描述。
+您可以从 [GitHub Release](https://github.com/tiann/KernelSU/releases) 下载 boot.img, 请注意您应该使用正确版本的 boot.img。如果您不知道应该下载哪一个文件，请仔细阅读本文档中关于 [KMI](#kmi) 和[安全补丁级别](#security-patch-level)的描述。
 
 通常情况下，同一个 KMI 和 安全补丁级别下会有三个不同格式的 boot 文件，它们除了内核压缩格式不同之外都一样。请检查您原有 boot.img 的内核压缩格式，您应该使用正确的格式，例如 `lz4`、`gz`；如果是用不正确的压缩格式，刷入 boot 后可能无法开机。
 
@@ -197,7 +200,7 @@ fastboot reboot
 
 步骤：
 
-1. 下载 AnyKernel3 的刷机包，如果你不知道下载哪一个，请仔细查阅上述文档中关于 [KMI](#kmi) 和 [安全补丁级别](#security-patch-level)的描述；下载错误的刷机包很可能导致无法开机，请注意备份。
+1. 下载 AnyKernel3 的刷机包，如果你不知道下载哪一个，请仔细查阅上述文档中关于 [KMI](#kmi) 和[安全补丁级别](#security-patch-level)的描述；下载错误的刷机包很可能导致无法开机，请注意备份。
 2. 打开内核刷写 App（授予必要的 root 权限），使用提供的 AnyKernel3 刷机包刷入。
 
 这种方法需要内核刷写 App 拥有 root 权限，你可以用如下几种方法实现：
@@ -229,8 +232,8 @@ Magisk 官方提供的 `magiskboot` 只能运行在 Android/Linux 设备上，�
 
 ### 准备 {#patch-preparation}
 
-1. 获取你手机的原厂 boot.img；你可以通过你手机的线刷包解压后之间获取，如果你是卡刷包，那你也许需要[payload-dumper-go](https://github.com/ssut/payload-dumper-go)
-2. 下载 KernelSU 提供的与你设备 KMI 版本一致的 AnyKernel3 刷机包；如果您不知道应该下载哪一个文件，请仔细阅读本文档中关于 [KMI](#kmi) 和 [安全补丁级别](#security-patch-level)的描述。
+1. 获取你手机的原厂 boot.img；你可以通过你手机的线刷包解压后之间获取，如果你是卡刷包，那你也许需要 [payload-dumper-go](https://github.com/ssut/payload-dumper-go)
+2. 下载 KernelSU 提供的与你设备 KMI 版本一致的 AnyKernel3 刷机包；如果您不知道应该下载哪一个文件，请仔细阅读本文档中关于 [KMI](#kmi) 和[安全补丁级别](#security-patch-level)的描述。
 3. 解压缩 AnyKernel3 刷机包，获取其中的 `Image` 文件，此文件为 KernelSU 的内核文件。
 
 ### 在 Android 设备上使用 magiskboot {#using-magiskboot-on-Android-devices}
@@ -263,7 +266,7 @@ Magisk 官方的 `magiskboot` 可以在 Linux 设备上执行，如果你是 Lin
 
 步骤：
 
-1. 在 KernelSU 的 [Release 页面](https://github.com/tiann/KernelSU/releases) 下载与你手机版本匹配的以 AnyKernel3 开头的 zip 刷机包；如果你不知道下载哪一个，请仔细查阅上述文档中关于**KMI**和**安全补丁级别**的描述；下载错误的刷机包很可能导致无法开机，请注意备份。
+1. 在 KernelSU 的 [Release 页面](https://github.com/tiann/KernelSU/releases) 下载与你手机版本匹配的以 AnyKernel3 开头的 zip 刷机包；如果你不知道下载哪一个，请仔细查阅上述文档中关于 **KMI** 和**安全补丁级别**的描述；下载错误的刷机包很可能导致无法开机，请注意备份。
 2. 重启手机进入 TWRP。
 3. 使用 adb 将 AnyKernel3-*.zip 放到手机 /sdcard 然后在 TWRP 图形界面选择安装；或者你也可以直接 `adb sideload AnyKernel-*.zip` 安装。
 
@@ -277,3 +280,14 @@ PS. 这种方法适用于任何情况下的安装（不限于初次安装或者�
 2. 使用某些 PC 上的刷机工具箱刷入 KernelSU 提供的内核。
 
 如果这些方法导致无法开机，请优先尝试用 `magiskboot` 的方法。
+
+## 安装后：模块支持 {#post-installation-module-support}
+
+::: warning 修改系统文件需要 METAMODULE
+如果您想使用修改 `/system` 文件的模块，需要在安装 KernelSU 后安装一个 **metamodule**。仅使用脚本、sepolicy 或 system.prop 的模块无需 metamodule。
+:::
+
+**要获得 `/system` 修改支持**，请参阅 [Metamodule 指南](metamodule.md) 了解：
+- 什么是 metamodule 以及为什么需要它们
+- 如何安装官方的 `meta-overlayfs` metamodule
+- 其他 metamodule 选项

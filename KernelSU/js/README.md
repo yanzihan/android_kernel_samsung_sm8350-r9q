@@ -10,12 +10,12 @@ yarn add kernelsu
 
 ### exec
 
-Spawns a **root** shell and runs a command within that shell, passing the `stdout` and `stderr` to a Promise when complete.
+Spawns a **root** shell and runs a command within that shell, returning a Promise that resolves with the `stdout` and `stderr` outputs upon completion.
 
 - `command` `<string>` The command to run, with space-separated arguments.
 - `options` `<Object>`
-  - `cwd` - Current working directory of the child process
-  - `env` - Environment key-value pairs
+  - `cwd` - Current working directory of the child process.
+  - `env` - Environment key-value pairs.
 
 ```javascript
 import { exec } from 'kernelsu';
@@ -31,13 +31,13 @@ if (errno === 0) {
 
 Spawns a new process using the given `command` in **root** shell, with command-line arguments in `args`. If omitted, `args` defaults to an empty array.
 
-Returns a `ChildProcess`, Instances of the ChildProcess represent spawned child processes.
+Returns a `ChildProcess` instance. Instances of `ChildProcess` represent spawned child processes.
 
 - `command` `<string>` The command to run.
 - `args` `<string[]>` List of string arguments.
 - `options` `<Object>`:
-  - `cwd` `<string>` - Current working directory of the child process
-  - `env` `<Object>` - Environment key-value pairs
+  - `cwd` `<string>` - Current working directory of the child process.
+  - `env` `<Object>` - Environment key-value pairs.
 
 Example of running `ls -lh /data`, capturing `stdout`, `stderr`, and the exit code:
 
@@ -63,9 +63,9 @@ ls.on('exit', (code) => {
 
 ##### Event 'exit'
 
-- `code` `<number>` The exit code if the child exited on its own.
+- `code` `<number>` The exit code if the child process exited on its own.
 
-The `'exit'` event is emitted after the child process ends. If the process exited, `code` is the final exit code of the process, otherwise null
+The `'exit'` event is emitted when the child process ends. If the process exits, `code` contains the final exit code; otherwise, it is null.
 
 ##### Event 'error'
 
@@ -101,6 +101,20 @@ import { fullScreen } from 'kernelsu';
 fullScreen(true);
 ```
 
+### enableEdgeToEdge
+
+Request the WebView to set padding to 0 or safeDrawing insets
+
+- tips: this is disabled by default but if you request resource from `internal/insets.css`, this will be enabled automatically.
+- To get insets value and enable this automatically, you can
+  - add `@import "https://mui.kernelsu.org/internal/insets.css";` in css OR
+  - add `<link rel="stylesheet" type="text/css" href="/internal/insets.css" />` in html.
+
+```javascript
+import { enableEdgeToEdge } from 'kernelsu';
+enableEdgeToEdge(true);
+```
+
 ### toast
 
 Show a toast message.
@@ -108,4 +122,67 @@ Show a toast message.
 ```javascript
 import { toast } from 'kernelsu';
 toast('Hello, world!');
+```
+
+### moduleInfo
+
+Get module info.
+
+```javascript
+import { moduleInfo } from 'kernelsu';
+// print moduleId in console
+console.log(moduleInfo());
+```
+
+### listPackages
+
+List installed packages.
+
+Returns an array of package names.
+
+- `type` `<string>` The type of packages to list: "user", "system", or "all".
+
+```javascript
+import { listPackages } from 'kernelsu';
+// list user packages
+const packages = listPackages("user");
+```
+
+- tips: when `listPackages` api is available, you can use ksu://icon/{packageName} to get app icon.
+
+``` javascript
+img.src = "ksu://icon/" + packageName;
+```
+
+### getPackagesInfo
+
+Get information for a list of packages.
+
+Returns an array of `PackagesInfo` objects.
+
+- `packages` `<string[]>` The list of package names.
+
+```javascript
+import { getPackagesInfo } from 'kernelsu';
+const packages = getPackagesInfo(['com.android.settings', 'com.android.shell']);
+```
+
+#### PackagesInfo
+
+An object contains:
+
+- `packageName` `<string>` Package name of the application.
+- `versionName` `<string>` Version of the application.
+- `versionCode` `<number>` Version code of the application.
+- `appLabel` `<string>` Display name of the application.
+- `isSystem` `<boolean>` Whether the application is a system app.
+- `uid` `<number>` UID of the application.
+
+### exit
+
+Exit the current WebUI activity.
+
+```javascript
+import { exit } from 'kernelsu';
+exit();
 ```

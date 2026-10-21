@@ -14,14 +14,14 @@ data class KernelVersion(val major: Int, val patchLevel: Int, val subLevel: Int)
 
     fun isGKI(): Boolean {
 
-        // kernel 6.x
-        if (major > 5) {
+        // kernel 5.x, 6.x
+        if (major > 4) {
             return true
         }
 
-        // kernel 5.10.x
-        if (major == 5) {
-            return patchLevel >= 10
+        // kernel 4.19.x
+        if (major == 4) {
+            return patchLevel >= 19
         }
 
         return false
@@ -30,11 +30,15 @@ data class KernelVersion(val major: Int, val patchLevel: Int, val subLevel: Int)
 
 fun parseKernelVersion(version: String): KernelVersion {
     val find = "(\\d+)\\.(\\d+)\\.(\\d+)".toRegex().find(version)
-    return if (find != null) {
-        KernelVersion(find.groupValues[1].toInt(), find.groupValues[2].toInt(), find.groupValues[3].toInt())
-    } else {
-        KernelVersion(-1, -1, -1)
+    if (find != null) {
+        val major = find.groupValues[1].toIntOrNull()
+        val patchLevel = find.groupValues[2].toIntOrNull()
+        val subLevel = find.groupValues[3].toIntOrNull()
+        if (major != null && patchLevel != null && subLevel != null) {
+            return KernelVersion(major, patchLevel, subLevel)
+        }
     }
+    return KernelVersion(-1, -1, -1)
 }
 
 fun getKernelVersion(): KernelVersion {

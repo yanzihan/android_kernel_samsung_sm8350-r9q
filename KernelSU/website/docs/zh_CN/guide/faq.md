@@ -1,28 +1,28 @@
 # 常见问题
 
-## KernelSU 是否支持我的设备 ？
+## KernelSU 是否支持我的设备？
 
 首先，您的设备应该能够解锁 bootloader。 如果不能，则不支持。
 
 然后在你的设备上安装 KernelSU 管理器并打开它，如果它显示 `不支持` ，那么你的设备没有官方支持的开箱即用的 boot image；但你可以自己编译内核集成 KernelSU 进而使用它。
 
-## KernelSU 是否需要解锁 Bootloader ？
+## KernelSU 是否需要解锁 Bootloader？
 
 当然需要。
 
-## KernelSU 是否支持模块 ？
+## KernelSU 是否支持模块？
 
-支持。请查阅 [模块](module.md)。
+支持。但是，如果您的模块需要修改 `/system` 文件，则需要安装 [metamodule](metamodule.md)（例如 `meta-overlayfs`）。其他模块功能无需 metamodule。请查阅 [模块](module.md)。
 
-## KernelSU 是否支持 Xposed ？
+## KernelSU 是否支持 Xposed？
 
 支持。LSPosed 可以在 [ZygiskNext](https://github.com/Dr-TSNG/ZygiskNext) 的支持下正常运行。
 
-## KernelSU 支持 Zygisk 吗?
+## KernelSU 支持 Zygisk 吗？
 
 KernelSU 本体不支持 Zygisk，但是你可以用 [ZygiskNext](https://github.com/Dr-TSNG/ZygiskNext) 来使用 Zygisk 模块。
 
-## KernelSU 与 Magisk 兼容吗 ？
+## KernelSU 与 Magisk 兼容吗？
 
 KernelSU 的模块系统与 Magisk 的 magic mount 有冲突，如果 KernelSU 中启用了任何模块，那么整个 Magisk 将无法工作。
 
@@ -38,7 +38,7 @@ KernelSU 的模块系统与 Magisk 的 magic mount 有冲突，如果 KernelSU �
 
 ## KernelSU 支持 Android 12 以下的设备吗？
 
-影响 KernelSU 兼容性的是设备内核的版本，它与设备的 Android 版本没有直接的关系。唯一有关联的是：**出厂** Android 12 的设备，一定是 5.10 或更高的内核（GKI设备）；因此结论如下：
+影响 KernelSU 兼容性的是设备内核的版本，它与设备的 Android 版本没有直接的关系。唯一有关联的是：**出厂** Android 12 的设备，一定是 5.10 或更高的内核（GKI 设备）；因此结论如下：
 
 1. 出厂 Android 12 的设备必定是支持的（GKI 设备）
 2. 旧版本内核的设备（即使是 Android 12，也可能是旧内核）是兼容的（你需要自己编译内核）
@@ -51,11 +51,11 @@ KernelSU 的模块系统与 Magisk 的 magic mount 有冲突，如果 KernelSU �
 
 参考[教程](how-to-integrate-for-non-gki)
 
-## 为什么我手机系统是 Android 13，但内核版本却是 "android12-5.10"?
+## 为什么我手机系统是 Android 13，但内核版本却是 "android12-5.10"？
 
 内核版本与 Android 版本无关，如果你需要刷入 KernelSU，请永远使用**内核版本**而非 Android 版本，如果你为 "android12-5.10" 的设备刷入 Android 13 的内核，等待你的将是 bootloop.
 
-## 我是 GKI1.0, 能用 KernelSU 吗?
+## 我是 GKI1.0, 能用 KernelSU 吗？
 
 GKI1 跟 GKI2 完全是两个东西，所以你需要自行编译内核。
 
@@ -67,8 +67,12 @@ GKI1 跟 GKI2 完全是两个东西，所以你需要自行编译内核。
 
 当然可以。但这个功能 KernelSU 没有内置，你可以安装这个 [systemless-hosts](https://github.com/symbuzzer/systemless-hosts-KernelSU-module)
 
-## 为什么有个 1 TB 的超大文件？
+## 为什么全新安装后模块不工作？
 
-1 TB 大小的 `modules.img` 是一个磁盘镜像文件，**不要担心它的大小**，它是一种被称之为[稀疏文件](https://en.wikipedia.org/wiki/Sparse_file)的文件格式，它的实际大小只有你使用的模块的大小，并且你在删除模块后它会动态缩小；它并不实际占用 1 TB 大小的磁盘空间（实际上你手机可能并没有这么多空间）。
+如果您的模块需要修改 `/system` 文件，您需要安装 [metamodule](metamodule.md) 来挂载 `system` 目录。其他模块功能（脚本、sepolicy、system.prop）无需 metamodule 即可工作。
 
-如果你真的对这个文件的大小感到不爽，你可以使用 `resize2fs -M` 命令让它变成实际大小；但此时模块可能无法正常工作，我们也不会为此提供任何支持。
+**解决方案**：参阅 [Metamodule 指南](metamodule.md) 获取安装说明。
+
+## 什么是 metamodule，为什么需要它？
+
+Metamodule 是一个特殊模块，为挂载常规模块提供基础设施。请参阅 [Metamodule 指南](metamodule.md) 获取完整说明。

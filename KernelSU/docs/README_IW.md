@@ -1,4 +1,4 @@
-[English](README.md) | [Español](README_ES.md) | [简体中文](README_CN.md) | [繁體中文](README_TW.md) | [日本語](README_JP.md) | [한국어](README_KR.md) | [Polski](README_PL.md) | [Português (Brasil)](README_PT-BR.md) | [Türkçe](README_TR.md) | [Русский](README_RU.md) | [Tiếng Việt](README_VI.md) | [Indonesia](README_ID.md) | **עברית** | [हिंदी](README_IN.md)
+[English](README.md) | [Español](README_ES.md) | [简体中文](README_CN.md) | [繁體中文](README_TW.md) | [日本語](README_JP.md) | [한국어](README_KR.md) | [Polski](README_PL.md) | [Português (Brasil)](README_PT-BR.md) | [Türkçe](README_TR.md) | [Русский](README_RU.md) | [Tiếng Việt](README_VI.md) | [Indonesia](README_ID.md) | **עברית** | [हिंदी](README_IN.md) | [Italiano](README_IT.md)
 
 # KernelSU
 
@@ -15,7 +15,7 @@
 ## תכונות
 
 1. ניהול root ו־`su` מבוססים על Kernel.
-2. מערכת מודולים מבוססת [OverlayFS](https://en.wikipedia.org/wiki/OverlayFS).
+2. מערכת מודולים מבוססת [metamodules](https://kernelsu.org/guide/metamodule.html): תשתית מודולרית לשינויים systemless.
 3. [פרופיל אפליקציה](https://kernelsu.org/guide/app-profile.html): נעילת גישת root בכלוב.
 
 ## מצב תאימות
@@ -24,7 +24,10 @@ KernelSU תומך במכשירי Android GKI 2.0 (kernel 5.10+) באופן רש�
 
 באמצעות זה, תמיכה זמינה גם ל-WSA, ChromeOS ומכשירי Android המבוססים על מיכלים.
 
-כרגע, רק `arm64-v8a` ו־`x86_64` נתמכים.
+כיום, נתמכות הארכיטקטורות `arm64-v8a` ו-`x86_64`.
+
+> [!CAUTION]
+> גרסאות קרנל אחרונות יישמו שינוי שובר תאימות הגורם ל-KernelSU להיכשל ועלול לעורר kernel panic ב-`x86_64`! בדוק באתר למידע נוסף!
 
 ## שימוש
 

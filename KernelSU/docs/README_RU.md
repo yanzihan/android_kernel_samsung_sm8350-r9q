@@ -1,4 +1,4 @@
-[English](README.md) | [Español](README_ES.md) | [简体中文](README_CN.md) | [繁體中文](README_TW.md) | [日本語](README_JP.md) | [한국어](README_KR.md) | [Polski](README_PL.md) | [Português (Brasil)](README_PT-BR.md) | [Türkçe](README_TR.md) | **Русский** | [Tiếng Việt](README_VI.md) | [Indonesia](README_ID.md) | [עברית](README_IW.md) | [हिंदी](README_IN.md)
+[English](README.md) | [Español](README_ES.md) | [简体中文](README_CN.md) | [繁體中文](README_TW.md) | [日本語](README_JP.md) | [한국어](README_KR.md) | [Polski](README_PL.md) | [Português (Brasil)](README_PT-BR.md) | [Türkçe](README_TR.md) | **Русский** | [Tiếng Việt](README_VI.md) | [Indonesia](README_ID.md) | [עברית](README_IW.md) | [हिंदी](README_IN.md) | [Italiano](README_IT.md)
 
 # KernelSU
 
@@ -15,7 +15,7 @@
 ## Особенности
 
 1. Управление `su` и root-доступом на основе ядра.
-2. Система модулей на основе [OverlayFS](https://en.wikipedia.org/wiki/OverlayFS).
+2. Система модулей на основе [metamodules](https://kernelsu.org/ru_RU/guide/metamodule.html): Подключаемая инфраструктура для безсистемных модификаций.
 3. [Профиль приложений](https://kernelsu.org/ru_RU/guide/app-profile.html): Запри корневую силу в клетке.
 
 ## Совместимость
@@ -24,7 +24,10 @@ KernelSU официально поддерживает устройства на
 
 WSA и Android на основе контейнеров также должны работать с интегрированным KernelSU.
 
-В настоящее время поддерживаются следующие ABI: `arm64-v8a` и `x86_64`.
+В настоящее время поддерживаются архитектуры `arm64-v8a` и `x86_64`.
+
+> [!CAUTION]
+> В последних версиях ядра реализовано критическое изменение, из-за которого KernelSU перестает работать и может вызвать панику ядра (kernel panic) на `x86_64`! Дополнительную информацию смотрите на сайте!
 
 ## Использование
 

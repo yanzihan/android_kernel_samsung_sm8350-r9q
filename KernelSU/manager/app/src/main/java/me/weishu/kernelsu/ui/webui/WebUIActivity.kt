@@ -1,68 +1,142 @@
 package me.weishu.kernelsu.ui.webui
 
+import android.os.Build
 import android.annotation.SuppressLint
-import android.app.ActivityManager
-import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
-import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.view.WindowManager
+import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.webkit.WebViewAssetLoader
-import com.topjohnwu.superuser.Shell
-import me.weishu.kernelsu.ui.util.createRootShell
-import java.io.File
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import me.weishu.kernelsu.data.repository.SettingsRepositoryImpl
+import me.weishu.kernelsu.ui.LocalUiMode
+import me.weishu.kernelsu.ui.UiMode
+import me.weishu.kernelsu.ui.theme.KernelSUTheme
+import me.weishu.kernelsu.ui.theme.ThemeController
+import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 
 @SuppressLint("SetJavaScriptEnabled")
 class WebUIActivity : ComponentActivity() {
-    private lateinit var webviewInterface: WebViewInterface
-
-    private var rootShell: Shell? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        enableEdgeToEdge()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { window.isNavigationBarContrastEnforced = false }
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
+
         super.onCreate(savedInstanceState)
-        val moduleId = intent.getStringExtra("id")!!
-        val name = intent.getStringExtra("name")!!
-        setTaskDescription(ActivityManager.TaskDescription("KernelSU - $name"))
 
-        val prefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
-        WebView.setWebContentsDebuggingEnabled(prefs.getBoolean("enable_web_debugging", false))
+        setContent {
+            val context = LocalContext.current
+            val prefs = context.getSharedPreferences("settings", MODE_PRIVATE)
+            val settingsRepo = remember { SettingsRepositoryImpl() }
+            var appSettings by remember { mutableStateOf(ThemeController.getAppSettings()) }
+            var uiModeValue by remember { mutableStateOf(settingsRepo.uiMode) }
+            val uiMode = remember(uiModeValue) {
+                UiMode.fromValue(uiModeValue)
+            }
 
-        val webRoot = File("/data/adb/modules/${moduleId}/webroot")
-        val rootShell = createRootShell(true).also { this.rootShell = it }
-        val webViewAssetLoader = WebViewAssetLoader.Builder()
-            .setDomain("mui.kernelsu.org")
-            .addPathHandler(
-                "/",
-                SuFilePathHandler(this, webRoot, rootShell)
-            )
-            .build()
+            DisposableEffect(prefs) {
+                val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+                    if (key in listOf("color_mode", "key_color", "color_style", "color_spec")) {
+                        appSettings = ThemeController.getAppSettings()
+                    } else if (key == "ui_mode") {
+                        uiModeValue = settingsRepo.uiMode
+                    }
+                }
+                prefs.registerOnSharedPreferenceChangeListener(listener)
+                onDispose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
+            }
 
-        val webViewClient = object : WebViewClient() {
-            override fun shouldInterceptRequest(
-                view: WebView,
-                request: WebResourceRequest
-            ): WebResourceResponse? {
-                return webViewAssetLoader.shouldInterceptRequest(request.url)
+            CompositionLocalProvider(LocalUiMode provides uiMode) {
+                KernelSUTheme(appSettings = appSettings, uiMode = uiMode) {
+                    MainContent(activity = this, onFinish = { finish() })
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MainContent(activity: ComponentActivity, onFinish: () -> Unit) {
+    val moduleId = remember { activity.intent.data?.getQueryParameter("id") }
+    val webUIState = remember { WebUIState() }
+
+    LaunchedEffect(moduleId) {
+        if (moduleId == null) {
+            onFinish()
+            return@LaunchedEffect
+        }
+        prepareWebView(activity, moduleId, webUIState)
+    }
+
+    DisposableEffect(Unit) {
+        onDispose { webUIState.dispose(activity) }
+    }
+
+    when (val event = webUIState.uiEvent) {
+        is WebUIEvent.Error -> {
+            LaunchedEffect(event) {
+                Toast.makeText(activity, event.message, Toast.LENGTH_SHORT).show()
+                onFinish()
             }
         }
 
-        val webView = WebView(this).apply {
-            settings.javaScriptEnabled = true
-            settings.domStorageEnabled = true
-            settings.allowFileAccess = false
-            webviewInterface = WebViewInterface(this@WebUIActivity, this)
-            addJavascriptInterface(webviewInterface, "ksu")
-            setWebViewClient(webViewClient)
-            loadUrl("https://mui.kernelsu.org/index.html")
+        is WebUIEvent.Close -> {
+            LaunchedEffect(event) { onFinish() }
         }
 
-        setContentView(webView)
+        else -> {}
     }
+    val isLoading = webUIState.uiEvent is WebUIEvent.Loading
 
-    override fun onDestroy() {
-        super.onDestroy()
-        runCatching { rootShell?.close() }
+    Crossfade(targetState = isLoading, animationSpec = tween(300)) { loading ->
+        if (loading) {
+            LoadingContent()
+        } else {
+            WebUIScreen(webUIState = webUIState)
+        }
+    }
+}
+
+@Composable
+private fun LoadingContent() {
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                InfiniteProgressIndicator()
+            }
+        }
+
+        UiMode.Material -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background),
+                contentAlignment = Alignment.Center
+            ) {
+                androidx.compose.material3.LoadingIndicator()
+            }
+        }
     }
 }

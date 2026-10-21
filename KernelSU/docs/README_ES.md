@@ -1,4 +1,4 @@
-[English](README.md) | **Español** | [简体中文](README_CN.md) | [繁體中文](README_TW.md) | [日本語](README_JP.md) | [한국어](README_KR.md) | [Polski](README_PL.md) | [Português (Brasil)](README_PT-BR.md) | [Türkçe](README_TR.md) | [Русский](README_RU.md) | [Tiếng Việt](README_VI.md) | [Indonesia](README_ID.md) | [עברית](README_IW.md) | [हिंदी](README_IN.md)
+[English](README.md) | **Español** | [简体中文](README_CN.md) | [繁體中文](README_TW.md) | [日本語](README_JP.md) | [한국어](README_KR.md) | [Polski](README_PL.md) | [Português (Brasil)](README_PT-BR.md) | [Türkçe](README_TR.md) | [Русский](README_RU.md) | [Tiếng Việt](README_VI.md) | [Indonesia](README_ID.md) | [עברית](README_IW.md) | [हिंदी](README_IN.md) | [Italiano](README_IT.md)
 
 # KernelSU
 
@@ -15,7 +15,7 @@ Una solución root basada en el kernel para dispositivos Android.
 ## Características
 
 1. Binario `su` basado en el kernel y gestión de acceso root.
-2. Sistema de módulos basado en [OverlayFS](https://en.wikipedia.org/wiki/OverlayFS).
+2. Sistema de módulos basado en [metamodules](https://kernelsu.org/guide/metamodule.html): Infraestructura conectable para modificaciones sin sistema.
 
 ## Estado de compatibilidad
 
@@ -23,7 +23,10 @@ Una solución root basada en el kernel para dispositivos Android.
 
 Con esto, WSA, ChromeOS y Android basado en contenedores están todos compatibles.
 
-Actualmente, solo se admiten las arquitecturas `arm64-v8a` y `x86_64`.
+Actualmente, se soportan las arquitecturas `arm64-v8a` y `x86_64`.
+
+> [!CAUTION]
+> ¡Las versiones recientes del kernel han implementado un cambio que rompe la compatibilidad, causando que KernelSU falle y potencialmente provoque un kernel panic en `x86_64`! ¡Consulta el sitio web para más información!
 
 ## Uso
 

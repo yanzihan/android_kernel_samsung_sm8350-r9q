@@ -7,6 +7,9 @@
 
 umask 022
 
+# customize.sh may set MODULE_HOT_INSTALL_REQUEST=true to skip the reboot
+export KSU_HAS_HOT_INSTALL=true
+
 ui_print() {
   if $BOOTMODE; then
     echo "$1"
@@ -236,6 +239,10 @@ api_level_arch_detect() {
     ARCH=x64
     ABI32=x86
     IS64BIT=true
+  elif [ "$ABI" = "riscv64" ]; then
+    ARCH=riscv64
+    ABI32=
+    IS64BIT=true
   else
     ARCH=arm
     ABI=armeabi-v7a
@@ -247,6 +254,42 @@ api_level_arch_detect() {
 #################
 # Module Related
 #################
+
+check_managed_features() {
+  local PROP_FILE=$1
+  local MANAGED_FEATURES=$(grep_prop managedFeatures "$PROP_FILE")
+
+  [ -z "$MANAGED_FEATURES" ] && return 0
+
+  ui_print "- Checking managed features: $MANAGED_FEATURES"
+
+  # Split features by comma
+  echo "$MANAGED_FEATURES" | tr ',' '\n' | while read -r feature; do
+    # Trim whitespace
+    feature=$(echo "$feature" | xargs)
+    [ -z "$feature" ] && continue
+
+    # Check feature status using ksud
+    local status=$(/data/adb/ksud feature check "$feature" 2>/dev/null)
+
+    case "$status" in
+      "unsupported")
+        ui_print "! WARNING: Feature '$feature' is NOT SUPPORTED by kernel"
+        ui_print "!          This module may not work correctly!"
+        ;;
+      "managed")
+        ui_print "! WARNING: Feature '$feature' is already MANAGED by another module"
+        ui_print "!          Feature conflicts may occur!"
+        ;;
+      "supported")
+        ui_print "- Feature '$feature' is supported and available"
+        ;;
+      *)
+        ui_print "! WARNING: Unable to check feature '$feature' status"
+        ;;
+    esac
+  done
+}
 
 set_perm() {
   chown $2:$3 $1 || return 1
@@ -277,14 +320,6 @@ mark_remove() {
   chmod 644 $1
 }
 
-mark_replace() {
-  # REPLACE must be directory!!!
-  # https://docs.kernel.org/filesystems/overlayfs.html#whiteouts-and-opaque-directories
-  mkdir -p $1 2>/dev/null
-  setfattr -n trusted.overlay.opaque -v y $1
-  chmod 644 $1
-}
-
 request_size_check() {
   reqSizeM=`du -ms "$1" | cut -f1`
 }
@@ -302,14 +337,15 @@ is_legacy_script() {
 }
 
 handle_partition() {
-    # if /system/vendor is a symlink, we need to move it out of $MODPATH/system, otherwise it will be overlayed
-    # if /system/vendor is a normal directory, it is ok to overlay it and we don't need to overlay it separately.
+    # if /system/vendor is a symlink, we need to move it out of $MODPATH/system
+    # if /system/vendor is a normal directory, no special handling is needed.
     if [ ! -e $MODPATH/system/$1 ]; then
         # no partition found
         return;
     fi
 
-    if [ -L "/system/$1" ] && [ "$(readlink -f /system/$1)" = "/$1" ]; then
+    # we move the folder to / only if it is a native folder that is not a symlink
+    if [ -d "/$1" ] && [ ! -L "/$1" ]; then
         ui_print "- Handle partition /$1"
         # we create a symlink if module want to access $MODPATH/system/$1
         # but it doesn't always work(ie. write it in post-fs-data.sh would fail because it is readonly)
@@ -345,6 +381,9 @@ install_module() {
   MODNAME=`grep_prop name $TMPDIR/module.prop`
   MODAUTH=`grep_prop author $TMPDIR/module.prop`
   MODPATH=$MODULEROOT/$MODID
+
+  # Check managed features
+  check_managed_features $TMPDIR/module.prop
 
   # Create mod paths
   rm -rf $MODPATH
@@ -406,12 +445,20 @@ install_module() {
   handle_partition vendor
   handle_partition system_ext
   handle_partition product
+  handle_partition odm
 
   if $BOOTMODE; then
     mktouch $NVBASE/modules/$MODID/update
     rm -rf $NVBASE/modules/$MODID/remove 2>/dev/null
     rm -rf $NVBASE/modules/$MODID/disable 2>/dev/null
     cp -af $MODPATH/module.prop $NVBASE/modules/$MODID/module.prop
+
+    # Tell ksud to apply the module right away
+    if [ "$MODULE_HOT_INSTALL_REQUEST" = "true" ]; then
+      echo "$MODULE_HOT_RUN_SCRIPT" > $MODPATH/.ksu_hot_install
+    else
+      rm -f $MODPATH/.ksu_hot_install
+    fi
   fi
 
   # Remove stuff that doesn't belong to modules and clean up any empty directories

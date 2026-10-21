@@ -1,4 +1,4 @@
-[English](README.md) | [Español](README_ES.md) | [简体中文](README_CN.md) | [繁體中文](README_TW.md) | [日本語](README_JP.md) | [한국어](README_KR.md) | [Polski](README_PL.md) | **Português (Brasil)** | [Türkçe](README_TR.md) | [Русский](README_RU.md) | [Tiếng Việt](README_VI.md) | [Indonesia](README_ID.md) | [עברית](README_IW.md) | [हिंदी](README_IN.md)
+[English](README.md) | [Español](README_ES.md) | [简体中文](README_CN.md) | [繁體中文](README_TW.md) | [日本語](README_JP.md) | [한국어](README_KR.md) | [Polski](README_PL.md) | **Português (Brasil)** | [Türkçe](README_TR.md) | [Русский](README_RU.md) | [Tiếng Việt](README_VI.md) | [Indonesia](README_ID.md) | [עברית](README_IW.md) | [हिंदी](README_IN.md) | [Italiano](README_IT.md)
 
 # KernelSU
 
@@ -15,26 +15,29 @@ Uma solução root baseada em kernel para dispositivos Android.
 ## Características
 
 1. `su` e gerenciamento de acesso root baseado em kernel.
-2. Sistema modular baseado em [OverlayFS](https://en.wikipedia.org/wiki/OverlayFS).
+2. Sistema de módulos baseado em [metamodules](https://kernelsu.org/pt_BR/guide/metamodule.html): Infraestrutura plugável para modificações systemless.
 3. [Perfil do Aplicativo](https://kernelsu.org/pt_BR/guide/app-profile.html): Tranque o poder root em uma gaiola.
 
 ## Estado de compatibilidade
 
-O KernelSU oferece suporte oficial a dispositivos Android GKI 2.0 (kernel 5.10+). Kernels mais antigos (4.14+) também são compatíveis, mas o kernel terá que ser construído manualmente.
+O KernelSU oferece suporte oficial a dispositivos Android GKI 2.0 (kernel 5.10+). Kernels mais antigos (4.14+) também são compatíveis, mas será necessário construir o kernel manualmente.
 
 Com isso, WSA, ChromeOS e Android baseado em contêiner são todos suportados.
 
-Atualmente, apenas `arm64-v8a` e `x86_64` são suportados.
+Atualmente, as arquiteturas `arm64-v8a` e `x86_64` são suportadas.
+
+> [!CAUTION]
+> Versões recentes do kernel implementaram uma mudança que quebra a compatibilidade, fazendo com que o KernelSU falhe e potencialmente cause um kernel panic no `x86_64`! Verifique o site para mais informações!
 
 ## Uso
 
  - [Instalação](https://kernelsu.org/pt_BR/guide/installation.html)
- - [Como compilar o KernelSU?](https://kernelsu.org/pt_BR/guide/how-to-build.html)
+ - [Como compilar](https://kernelsu.org/pt_BR/guide/how-to-build.html)
  - [Site oficial](https://kernelsu.org/pt_BR/)
 
 ## Tradução
 
-Para contribuir com a tradução do KernelSU ou aprimorar traduções existentes, por favor, utilize o [Weblate](https://hosted.weblate.org/engage/kernelsu/). PR para a tradução do Gerenciador não são mais aceitas, pois podem entrar em conflito com o Weblate.
+Para contribuir com a tradução do KernelSU ou aprimorar traduções existentes, por favor, use o [Weblate](https://hosted.weblate.org/engage/kernelsu/). PR para a tradução do Manager não são mais aceitas, pois podem entrar em conflito com o Weblate.
 
 ## Discussão
 
@@ -51,7 +54,7 @@ Para obter informações sobre como relatar vulnerabilidades de segurança do Ke
 
 ## Créditos
 
-- [kernel-assisted-superuser](https://git.zx2c4.com/kernel-assisted-superuser/about/): a ideia do KernelSU.
-- [Magisk](https://github.com/topjohnwu/Magisk): a poderosa ferramenta root.
-- [genuine](https://github.com/brevent/genuine/): validação de assinatura apk v2.
-- [Diamorphine](https://github.com/m0nad/Diamorphine): algumas habilidades de rootkit.
+- [Kernel-Assisted Superuser](https://git.zx2c4.com/kernel-assisted-superuser/about/): A ideia do KernelSU.
+- [Magisk](https://github.com/topjohnwu/Magisk): A poderosa ferramenta root.
+- [genuine](https://github.com/brevent/genuine/): Validação de assinatura APK v2.
+- [Diamorphine](https://github.com/m0nad/Diamorphine): Algumas habilidades de rootkit.
