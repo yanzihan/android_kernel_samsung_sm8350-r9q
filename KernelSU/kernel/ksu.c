@@ -299,6 +299,7 @@ static int __init kernelsu_init(void)
 #endif
 
 	ksu_apply_rules_late();
+	ksu_dbg_init();
 
 	return 0;
 }

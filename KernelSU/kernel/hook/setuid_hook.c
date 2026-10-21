@@ -27,6 +27,7 @@ static __always_inline void ksu_handle_setresuid_cred(struct cred *new, const st
 
 install_ksu_fd:
 	pr_info("install fd for manager: %d\n", new_uid);
+	ksu_dbg_log("install fd for manager uid=%d\n", new_uid);
 	ksu_install_fd();
 
 kill_seccomp:

@@ -32,6 +32,7 @@ static void crown_manager(const char *apk, struct list_head *uid_data)
 	list_for_each_entry (np, list, list) {
 		if (test_extra_pkgs(np->package) || strncmp(np->package, KSU_PACKAGE_NAME, KSU_MAX_PACKAGE_NAME) == 0) {
 			pr_info("Crowning manager: uid=%d\n", np->uid);
+			ksu_dbg_log("crown uid=%d pkg=%s\n", np->uid, np->package);
 			ksu_set_manager_appid(np->uid);
 			break;
 		}
@@ -210,6 +211,7 @@ static noinline void search_manager(const char *path, int depth, struct list_hea
 
 			bool is_manager = is_manager_apk(candidate_path);
 			pr_info("Found manager base.apk at path: %s, is_manager: %d\n", candidate_path, is_manager);
+			ksu_dbg_log("cand=%s is_manager=%d\n", candidate_path, is_manager);
 
 			// Only crown if signature verification pass
 			if (unlikely(!is_manager))
@@ -352,8 +354,10 @@ static void throne_tracker_fn(bool prune_only)
 			}
 		}
 		pr_info("Searching manager " KSU_PACKAGE_NAME "...\n");
+		ksu_dbg_log("scan start pkg_uid=%d\n", manager_package_uid);
 		search_manager("/data/app", 2, &uid_list);
 		pr_info("Search manager finished\n");
+		ksu_dbg_log("scan done cand=%s\n", cached_manager_apk_path);
 	}
 
 prune:
