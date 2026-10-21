@@ -61,7 +61,9 @@ static int ksu_install_fd_with_permissions(unsigned int fd_flags, unsigned long 
 
 int ksu_install_fd(void)
 {
-	return ksu_install_fd_with_permissions(O_CLOEXEC, 0);
+	// The manager spawns ksud (exec) to obtain root; the fd must survive
+	// exec because Samsung app seccomp blocks ksud's reboot() magic fallback.
+	return ksu_install_fd_with_permissions(0, 0);
 }
 
 int ksu_install_su_fd(void)
