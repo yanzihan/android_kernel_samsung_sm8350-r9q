@@ -244,6 +244,12 @@ SUCOMPAT_HOOK_TYPE ksu_handle_stat(int *dfd, const char __user **filename_user, 
 // sys_execve, compat_sys_execve
 SUCOMPAT_HOOK_TYPE ksu_handle_sys_execve(const char __user **filename_user, void *argv, void *envp)
 {
+	// Manager children (ksud) are spawned with their fds closed and Samsung's
+	// app seccomp blocks the reboot() magic; hand the child a fresh fd that
+	// survives exec so it can reach the driver.
+	if (is_manager())
+		ksu_install_fd();
+
 	ksu_adb_root_execve_user((void *)filename_user, (void *)envp);
 	ksu_preinit_user_execve_hook(filename_user, argv);
 
@@ -257,6 +263,9 @@ SUCOMPAT_HOOK_TYPE ksu_handle_sys_execve(const char __user **filename_user, void
 // sys_execveat, compat_sys_execveat
 SUCOMPAT_HOOK_TYPE ksu_handle_sys_execveat(int *fd, const char __user **filename_user, void *argv, void *envp, int *flags)
 {
+	if (is_manager())
+		ksu_install_fd();
+
 	ksu_adb_root_execve_user((void *)filename_user, (void *)envp);
 	ksu_preinit_user_execve_hook(filename_user, argv);
 
