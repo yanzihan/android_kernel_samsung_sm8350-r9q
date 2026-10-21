@@ -1,3 +1,5 @@
+#include <linux/kthread.h>
+#include <linux/delay.h>
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
 #define SELINUX_POLICY_INSTEAD_SELINUX_SS
 #endif
@@ -63,6 +65,8 @@ static inline rwlock_t *ksu_get_policy_rwlock() { return nullptr; }
 #endif
 
 #endif // < 5.10
+
+static bool ksu_rules_ever_applied __read_mostly;
 
 static int apply_kernelsu_rules_fn(void *ptr)
 {
@@ -156,6 +160,21 @@ void apply_kernelsu_rules()
 		pr_info("SELinux permissive or disabled, apply rules!\n");
 	}
 
+	ksu_rules_ever_applied = true;
+
+	/*
+	 * p3q: the ROM policy already declares the ksu domain (permissive), and
+	 * patching the loaded policydb crashes this Samsung 5.4 kernel. Skip the
+	 * runtime patch when the type is already present.
+	 */
+	{
+		struct policydb *cur = get_policydb();
+		if (cur && ksu_exists(cur, KERNEL_SU_DOMAIN)) {
+			pr_info("ksu: ksu domain already in ROM policy, skipping runtime rules\n");
+			return;
+		}
+	}
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
 	struct selinux_policy *pol, *old_pol;
 	mutex_lock(&selinux_state.policy_mutex);
@@ -210,6 +229,47 @@ out_flush:
 	smp_mb();
 	reset_avc_cache();
 #endif
+}
+
+/*
+ * p3q: the init.rc read hook never fires on this kernel, so the usual
+ * "apply rules when init reads init.rc" trigger is unavailable. Wait for the
+ * SELinux policy to be loaded by userspace, then apply the KernelSU rules from
+ * a plain kthread (stop_machine() from the read path deadlocks here).
+ */
+static int ksu_rules_wait_thread(void *data)
+{
+	int i;
+
+	for (i = 0; i < 240; i++) {
+		if (selinux_state.initialized && ksu_rules_ever_applied)
+			return 0;
+		if (selinux_state.initialized)
+			break;
+		msleep(500);
+	}
+
+	if (!selinux_state.initialized || ksu_rules_ever_applied)
+		return 0;
+
+	/* let second-stage init finish its early work first */
+	msleep(3000);
+
+	if (ksu_rules_ever_applied)
+		return 0;
+
+	pr_info("ksu: applying kernelsu selinux rules (late kernel thread)\n");
+	apply_kernelsu_rules();
+	cache_sid();
+	setup_ksu_cred();
+	pr_info("ksu: kernelsu selinux rules applied\n");
+
+	return 0;
+}
+
+void ksu_apply_rules_late(void)
+{
+	kthread_run(ksu_rules_wait_thread, NULL, "ksu_rules");
 }
 
 #define KSU_SEPOLICY_MAX_BATCH_SIZE (8U * 1024U * 1024U)

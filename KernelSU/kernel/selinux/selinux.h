@@ -33,6 +33,7 @@ bool is_init(const struct cred* cred);
 bool is_adbd(const struct cred *cred);
 
 void apply_kernelsu_rules();
+void ksu_apply_rules_late(void);
 
 int handle_sepolicy(void __user *user_data, u64 data_len);
 

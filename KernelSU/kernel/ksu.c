@@ -45,6 +45,7 @@
 // kernel compat
 #include "kernel_compat.h"
 #include "include/util.h"
+#include "include/ksu_dbg.h"
 
 #include "policy/app_profile.h"
 #include "policy/allowlist.h"
@@ -296,6 +297,8 @@ static int __init kernelsu_init(void)
 #ifdef CONFIG_KSU_HACK_ARM64_BRANCH_LINK
 	ksu_branch_link_patch_init();
 #endif
+
+	ksu_apply_rules_late();
 
 	return 0;
 }
