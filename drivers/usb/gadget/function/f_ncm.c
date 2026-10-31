@@ -1497,6 +1497,8 @@ static int ncm_bind(struct usb_configuration *c, struct usb_function *f)
 	}
 	ncm->port.ioport = netdev_priv(ncm_opts->net);
 
+	ncm_string_defs[1].s = ncm->ethaddr;
+
 	us = usb_gstrings_attach(cdev, ncm_strings,
 				 ARRAY_SIZE(ncm_string_defs));
 	if (IS_ERR(us)) {
