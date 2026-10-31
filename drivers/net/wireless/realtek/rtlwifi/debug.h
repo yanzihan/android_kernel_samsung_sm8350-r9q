@@ -164,6 +164,9 @@ void _rtl_dbg_print_data(struct rtl_priv *rtlpriv, u64 comp, int level,
 	_rtl_dbg_trace(rtlpriv, comp, level,				\
 		       fmt, ##__VA_ARGS__)
 
+#define rtl_dbg(rtlpriv, comp, level, fmt, ...)				\
+	RT_TRACE(rtlpriv, comp, level, fmt, ##__VA_ARGS__)
+
 #define RTPRINT(rtlpriv, dbgtype, dbgflag, fmt, ...)			\
 	_rtl_dbg_print(rtlpriv, dbgtype, dbgflag, fmt, ##__VA_ARGS__)
 
@@ -180,6 +183,13 @@ __printf(4, 5)
 static inline void RT_TRACE(struct rtl_priv *rtlpriv,
 			    u64 comp, int level,
 			    const char *fmt, ...)
+{
+}
+
+__printf(4, 5)
+static inline void rtl_dbg(struct rtl_priv *rtlpriv,
+			   u64 comp, int level,
+			   const char *fmt, ...)
 {
 }
 
