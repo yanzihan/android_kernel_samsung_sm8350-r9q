@@ -1422,6 +1422,9 @@ static int qcom_socinfo_probe(struct platform_device *pdev)
 	qs->attr.revision = devm_kasprintf(&pdev->dev, GFP_KERNEL, "%u.%u",
 					   SOCINFO_MAJOR(le32_to_cpu(info->ver)),
 					   SOCINFO_MINOR(le32_to_cpu(info->ver)));
+	if (!qs->attr.soc_id || !qs->attr.revision)
+		return -ENOMEM;
+
 	qs->attr.soc_id = kasprintf(GFP_KERNEL, "%d", socinfo_get_id());
 
 	if (socinfo_format >= SOCINFO_VERSION(0, 16)) {
