@@ -145,3 +145,18 @@ x509.genkey
 
 # Clang's compilation database file
 /compile_commands.json
+
+#
+# r9q build artifacts & local tools
+#
+/out/
+/dist/
+/build.log
+/arch/arm64/boot/Image
+/toolchains/
+/AnyKernel3/
+__pycache__/
+/boot/base.img
+/boot/work/
+/boot/ramdisk
+/boot/ramdisk.cpio
